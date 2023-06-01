@@ -1,0 +1,344 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<title>RLM Log Reader Documentation</title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" type="text/css" href="../styles.css" />
+<style>
+body
+{
+background-color:#ffffff;
+margin: 20px 20px 20px 20px;
+padding: 0px 0px 0px 0px;
+}
+
+body, p, table, td, th
+{
+font-family: arial,sans-serif;
+color: #000000;
+}
+
+a:link    {text-decoration:none;color:#0000aa;font-weight:bold}
+a:visited {text-decoration:none;color:#0000aa;font-weight:bold}
+a:active  {text-decoration:underline;color:#0000aa;font-weight:bold}
+a:hover   {text-decoration:underline;color:#0000aa;font-weight:bold}
+
+p, li
+{
+margin: 0px 0px 20px 0px; /* top right bottom left */
+}
+
+h1 {
+font-size: 200%;
+padding: 0.1em;
+text-align: center;
+}
+
+h2 {
+font-size: 140%;
+text-align: left;
+margin: 40px 0px 0px 0px; /* top right bottom left */
+}
+
+h3 {
+font-size: 120%;
+text-align: left;
+margin: 30px 0px 0px 0px; /* top right bottom left */
+text-decoration: underline;
+}
+</style>
+</head>
+<body>
+
+<h1>RLM Log Reader</h1>
+
+
+<p>To download the latest version of RLM Log Reader, go to <a href="http://sourceforge.net/projects/rlmlogreader">http://sourceforge.net/projects/rlmlogreader</a>.</p>
+
+<h2>Updates</h2>
+
+<p><b>1.1.0 - March 31, 2014:</b> Output the license token count rather than assuming that each checkin/checkout event is one seat.</p>
+
+<h2>What it does</h2>
+
+<p>This utility reads usage log files from Reprise License Manager (RLM) and produces reports that can be more easily read by a human and analyzed in spreadsheet software.  RLM is a third-party license manager for Independent Software Vendors (ISVs) to enforce license policies with their products.  RLM Log Reader is not affiliated in any way with Reprise License Manager or Reprise Software.  For more information on their products, visit their website: <a href="http://www.reprisesoftware.com">http://www.reprisesoftware.com</a>.</p>
+
+
+<h2>Supported log formats</h2>
+
+<p>RLM Log Reader reads the <i>std</i> and <i>detailed</i> variations of report logs and ISV logs from Reprise License Manager.  The report log is designed to be parsed and contains more data, so if you have it, use it.  Otherwise, use the ISV log file.  Keep in mind that the ISV log file isn't fully documented so it is possible to have a file with data in it not handled by this utility.  If you run into any errors, please contact me and send the file, if possible.</p>
+
+
+<h2>Configuring RLM to output log files</h2>
+<p>The following steps assume you already have RLM installed, a license key is installed, and the server is running.</p>
+
+<ol>
+<li>In a web browser, go to http://HOSTNAME:5054, where HOSTNAME is the computer hostname of the license server and 5054 is RLM's web port.</li>
+<li>On the left side, click Status</li>
+<li>Under the ISV Servers section in the center of the page, click the button under OPTIONS</li>
+<li>To add a report log, add the following line to the form:<br />
+<code>REPORTLOG +./report.log</code><br />
+To add an ISV log, add this line to the form:<br />
+<code>DEBUGLOG +./isv.log</code></li>
+<li>Click Update Options</li>
+<li>On the left side, click Shutdown</li>
+<li>Click SHUT DOWN SERVER (NOTE: This will disrupt any current usage of licenses on this server)</li>
+<li>On the left side, click Reread/Restart Servers, then REREAD/RESTART</li>
+</ol>
+
+<p>The log files will be located in the same directory as the RLM binary files.  If you need assistance, consult the RLM License Administration Manual: <a href="http://www.reprisesoftware.com/RLM_License_Administration.html">http://www.reprisesoftware.com/RLM_License_Administration.html</a></p>
+
+
+<h2>How to use RLM Log Reader</h2>
+
+<ol>
+<li>Run the RLM Log Reader application</li>
+<li>Click Browse File... and select the log file to read.  If you don't have any on hand, the installation itself contains <i>SampleLog_Report.log</i> and <i>SampleLog_ISV.log</i>.</li>
+<li>Click Select Directory... and select the directory where the report files will be written</li>
+<li>Click Generate to write out the reports and display the output directory</li>
+</ol>
+
+
+<h2>Explanation of log reports</h2>
+
+<p>The following lists each report document and what data they contain.</p>
+
+<h3>Summary</h3>
+<ul>
+<li><b>Log Data Summary For:</b> Full path to the log file used to generate the reports</li>
+<li><b>Server Name:</b> Hostname of the computer where RLM runs</li>
+<li><b>Server Start(s):</b> Provides the date, time, and server hostname of each RLM start event</li>
+<li><b>Server Shutdown(s):</b> Provides the date and time of each RLM shut down event</li>
+<li><b>Product(s):</b> A list of every product available through this RLM server</li>
+<li><b>Users(s):</b> A list of every user who has checked out a license through this RLM server.  This is the computer user name.</li>
+<li><b>Denials(s):</b> A list of every denial experienced through this RLM server.  A denial occurs when the maximum number of tokens allowed by a license are checked out and an additional request for a token is made.  Each denial instance contains the date/time, the product name, the product version, and the user name.</li>
+</ul>
+
+<h3>UsageOverTime</h3>
+<ul>
+<li><b>Date/Time:</b> The date and time of the checkout or checkin event</li>
+<li><b>[product] Licenses in use:</b> The current number of license tokens in use, by product</li>
+<li><b>[product] Unique user count:</b> The current number of unique users that have licenses checked out, by product.  Since the report log provides a running count of licenses checked out, but not who checked out tokens, there can be some ambiguity regarding the real unique user count if the log file wasn't configured to start when the server started.  If checkouts happened before the log started, the unique count is assumed to be 1.  The actual count is somewhere between 1 and the number of tokens currently checked out.</li>
+<li><b>[product] Total licenses</b> (report log only): The total number of tokens available, by product.  This value can change as licenses are added/removed to/from RLM.</li>
+</ul>
+
+<h3>UsageDuration (report log only)</h3>
+<ul>
+<li><b>Checkout Date/Time:</b> The date and time of the checkout</li>
+<li><b>Checkin Date/Time:</b> The date and time of the checkin</li>
+<li><b>Product:</b> The product that was used</li>
+<li><b>Version:</b> The version of the product that was used</li>
+<li><b>User:</b> The user who used the product.  This is the computer user name.</li>
+<li><b>Duration (HH:MM:SS):</b> The duration of product usage, in hours:minutes:seconds</li>
+</ul>
+
+<h3>TotalDuration (report log only)</h3>
+<ul>
+<li><b>User:</b> The user who used the product.  This is the computer user name.</li>
+<li><b>[product] Duration (HH:MM:SS):</b> The total duration the product was used by that user, in hours:minutes:seconds</li>
+</ul>
+
+<p>Note: The report log displays time in hours:minutes:seconds, while the ISV log displays time in hours:minutes</p>
+
+
+<h2>Known issues</h2>
+
+<p>When using RLM Log Reader from a terminal on Linux, the following terminal output appears:<br />
+<code>
+X Error: BadDrawable (invalid Pixmap or Window parameter) 9<br />
+&nbsp;&nbsp;Major opcode: 62 (X_CopyArea)<br />
+&nbsp;&nbsp;Resource id:  0x0<br />
+</code>
+It doesn't appear to affect performance of the application.  It seems to be caused by the presence of an application icon, but I'm not sure how to fix it.  If you have any ideas, let me know.</p>
+
+
+
+<h2>Building instructions</h2>
+
+<p>This section is only relevant to people who want to build RLM Log Reader from the source code, presumably to make changes to it.</p>
+
+<p>I've included my personal build documentation here so that (1) other people can build it and (2) so I can remember how to build it months from now.  I kept the documentation specific to the platforms and tools I used, but thanks to the CMake code, it should be possible to build it for different compilers on different platforms.  These instructions only use free tools so it is ideal for someone setting up a build environment for hobby projects.  Hope it helps!</p>
+
+
+<h3>Mac OS X 10.7.5</h3>
+<ol>
+<li>Download and install <a href="http://cmake.org/">CMake</a> (with command line tools)</li>
+<li>Set up Xcode</li>
+  <ol type="a">
+  <li>Download and install <a href="https://developer.apple.com/xcode/">Xcode</a></li>
+  <li>Open Xcode (it asked to do a system component installation, which I let it do)</li>
+  <li>Go to Xcode > Preferences</li>
+  <li>Install Command Line Tools</li>
+  </ol>
+<li>Build Boost 1.53</li>
+  <ol type="a">
+  <li>Download <a href="http://www.boost.org/users/download/?">Boost</a></li>
+  <li>Extract files from the archive to /Users/steve/Desktop/boost_1.53.0_static</li>
+  <li>In the terminal, change directory to the extracted files</li>
+  <li>Run these terminal commands:<br />
+  <code>
+  ./bootstrap.sh<br />
+  ./b2
+  </code></li>
+  </ol>
+<li>Build Qt 4.8.4</li>
+  <ol type="a">
+  <li>Download <a href="http://qt-project.org/downloads">Qt</a> 4 source code</li>
+  <li>Extract files from the tar archive</li>
+  <li>In the terminal, change directory to the extracted files directory</li>
+  <li>Run these terminal commands:<br />
+  <code>
+  ./configure -prefix /Users/steve/Desktop/qt_4.8.4 -arch x86_64 -debug-and-release -opensource -confirm-license -no-qt3support -no-openssl -no-phonon -no-webkit -nomake demos -nomake examples<br />
+make<br />
+make install
+  </code></li>
+  </ol>
+<li>Building RLM Log Reader</li>
+  <ol type="a">
+  <li>Unzip the RLM Log Reader source code</li>
+  <li>Make a <i>_build</i> directory for the binary files alongside the <i>RLMLogReader</i> subdirectory</li>
+  <li>Change directory to the <i>_build</i> directory</li>
+  <li>To create the makefiles used for the build process, run this CMake command:<br />
+  <code>cmake ../RLMLogReader -DQT_QMAKE_EXECUTABLE=/Users/steve/Desktop/qt_4.8.4/bin/qmake -DBOOST_ROOT=/Users/steve/Desktop/boost_1.53.0_static</code></li>
+  <li>To build, run this command:<br />
+  <code>make</code></li>
+  <li>To stage all the installation files in the <i>_install</i> subdirectory, run this command:<br />
+  <code>make install</code></li>
+  <li>To build the zip file containing the install and copy it into the <i>_package</i> subdirectory, run this command:<br />
+  <code>make package</code></li>
+  <li>To build the zip file containing the source code and copy it into the <i>_package</i> subdirectory, run this command:<br />
+  <code>make package_source</code></li>
+  </ol>
+</ol>
+
+
+<h3>CentOS 5.5 (32-bit and 64-bit)</h3>
+<ol>
+<li>Build CMake</li>
+  <ol type="a">
+  <li>Download <a href="http://cmake.org/">CMake</a></li>
+  <li>Extract source files from the tar archive</li>
+  <li>In the terminal, change directory to the extracted files directory</li>
+  <li>Run these terminal commands:<br />
+  <code>
+  ./configure<br />
+  make
+  </code></li>
+  <li>Then under root, run this:<br />
+  <code>
+  make install
+  </code></li>
+  </ol>
+<li>Build Boost 1.53</li>
+  <ol type="a">
+  <li>Download <a href="http://www.boost.org/users/download/?">Boost</a></li>
+  <li>Extract files from the archive to /home/steve/Desktop/boost_1.53.0_static</li>
+  <li>In the terminal, change directory to the extracted files</li>
+  <li>Run these terminal commands:<br />
+  <code>
+  ./bootstrap.sh<br />
+  ./b2
+  </code></li>
+  </ol>
+<li>Build Qt 4.8.4</li>
+  <ol type="a">
+  <li>Run this command under root to install some needed X libraries:<br />
+  <code>yum install libXext-devel</code></li>
+  <li>Download <a href="http://qt-project.org/downloads">Qt</a> 4 source code</li>
+  <li>Extract files from the tar archive</li>
+  <li>In the terminal, change directory to the extracted files directory</li>
+  <li>Run these terminal commands:<br />
+  <code>./configure -prefix /home/steve/Desktop/qt_4.8.4_static -debug-and-release -static -opensource -confirm-license -no-qt3support -no-openssl -no-phonon -no-webkit -nomake demos -nomake examples<br />
+  make<br />
+  make install
+  </code></li>
+  </ol>
+<li>Building RLM Log Reader</li>
+  <ol type="a">
+  <li>Unzip the RLM Log Reader source code</li>
+  <li>Make a <i>_build</i> directory for the binary files alongside the <i>RLMLogReader</i> subdirectory</li>
+  <li>Change directory to the <i>_build</i> directory</li>
+  <li>To create the makefiles used for the build process, run this CMake command:<br />
+  <code>cmake ../RLMLogReader -DQT_QMAKE_EXECUTABLE=/home/steve/Desktop/qt_4.8.4_static/bin/qmake -DBOOST_ROOT=/home/steve/Desktop/boost_1.53.0_static</code></li>
+  <li>To build, run this command:<br />
+  <code>make</code></li>
+  <li>To stage all the installation files in the <i>_install</i> subdirectory, run this command:<br />
+  <code>make install</code></li>
+  <li>To build the zip file containing the install and copy it into the <i>_package</i> subdirectory, run this command:<br />
+  <code>make package</code></li>
+  <li>To build the zip file containing the source code and copy it into the <i>_package</i> subdirectory, run this command:<br />
+  <code>make package_source</code></li>
+  </ol>
+</ol>
+
+
+<h3>Windows 7 64-bit (produces 32-bit binaries)</h3>
+<ol>
+<li>Download and install <a href="http://www.microsoft.com/visualstudio/eng/products/visual-studio-2010-express">Microsoft Visual C++ 2010</a></li>
+<li>The previous install will place the files <i>msvcp100.dll</i> and <i>msvcr100.dll</i> in the <i>C:\Windows\SysWOW64</i> folder.  Copy them to <i>C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\redist\x86\Microsoft.VC100.CRT</i> so CMake can copy them to the installation during the build process.  These files gets installed to that location when installing Visual Studio 2010, but not when installing Visual C++ 2010.</li>
+<li>Download and install <a href="http://cmake.org/">CMake</a> (add CMake to the system PATH)</li>
+<li>Build Boost 1.53</li>
+  <ol type="a">
+  <li>Download <a href="http://www.boost.org/users/download/?">Boost</a></li>
+  <li>Extract files from the archive to E:/3rdpartylibs/boost_1.53.0_static</li>
+  <li>Go to Start > All Programs > Microsoft Visual Studio 2010 Express > Visual Studio Command Prompt</li>
+  <li>Change directory to the extracted files</li>
+  <li>Run these terminal commands:<br />
+  <code>
+  bootstrap.bat<br />
+  b2
+  </code></li>
+  </ol>
+<li>Build Qt 4.8.4</li>
+  <ol type="a">
+  <li>Download <a href="http://qt-project.org/downloads">Qt</a> 4 source code</li>
+  <li>Extract files from the archive to E:/3rdpartylibs/qt_4.8.4_static</li>
+  <li>Go to Start > All Programs > Microsoft Visual Studio 2010 Express > Visual Studio Command Prompt</li>
+  <li>Change directory to the extracted files</li>
+  <li>Run these terminal commands:<br />
+  <code>
+  configure.exe -debug-and-release -static -opensource -confirm-license -no-qt3support -no-openssl -no-phonon -no-webkit -nomake demos -nomake examples<br />
+  nmake
+  </code></li>
+  </ol>
+<li>Building RLM Log Reader</li>
+  <ol type="a">
+  <li>Unzip the RLM Log Reader source code</li>
+  <li>Make a <i>_build</i> directory for the binary files alongside the <i>RLMLogReader</i> subdirectory</li>
+  <li>Open CMake</li>
+  <li>Set the source code directory to the <i>RLMLogReader</i> subdirectory</li>
+  <li>Set the binary directory to the <i>_build</i> directory</li>
+  <li>Click the Add Entry button and add a variable named BOOST_ROOT of type PATH with the value <i>E:/3rdpartylibs/boost_1_53_0</i></li>
+  <li>Click the Add Entry button and add a variable named QT_QMAKE_EXECUTABLE of type FILEPATH with the value <i>E:/3rdpartylibs/qt_4.8.4/bin/qmake.exe</i></li>
+  <li>Click the Generate button and choose generator <i>Visual Studio 10</i> to create the project files</li>
+  <li>Open Microsoft Visual C++ 2010</li>
+  <li>Go to File > Open Project/Solution and select <i>RLMLogReader.sln</i> from the <i>_build</i> directory</li>
+  <li>To build, go to the Debug menu and choose Build Solution.  If you are deploying the application, be sure to change the Solution Configuration dropdown from Debug to Release.</li>
+  <li>To stage all the installation files, right-click on the INSTALL project in Solution Explorer and choose Build.  The files are copied to <i>_build/_install</i>.</li>
+  <li>To build the zip file containing the install, right-click on the PACKAGE project in Solution Explorer and choose Build.  The package is copied to <i>_build/_package</i>.</li>
+  <li>To build the zip file containing the source code, right-click on the PACKAGE_SOURCE project in Solution Explorer and choose Build.  It's copied to <i>_build/_package</i>.</li>
+  </ol>
+</ol>
+
+
+<h2>Automated testing infrastructure</h2>
+
+<p>The <i>Test</i> subdirectory of the source code directory contains a selection of unit tests and integration tests that run every time code has been changed.  If you place additional log files in the <i>ExtraTestFiles</i> subdirectory (alongside the <i>TestFiles</i> directory), reports for these files will be generated and any exceptions hit during that process will be reported as a test failure.  I kept all log files from customers I had in this directory so I could be confident my changes didn't break their compatibility with the application.  Anonymized excerpts from these files ultimately became part of the integration test suite.</p>
+
+
+<h2>About RLM Log Reader</h2>
+
+<p>Designed and programmed by Steve Robinson</p>
+
+<p>Released under the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public License</a>, which means it's free software.</p>
+
+<p>Well it's just a license manager log reader, I didn't exactly gather a team for the fame, riches, and glory that would follow!  Nonetheless, I would like to thank the following people:
+<ul>
+<li><b>Raja Olimuthu:</b> For trying out the tool and giving feedback on how it could work better</li>
+<li><b>Scott Fowler:</b> For reviewing the code and giving me advice on how to make it better</li>
+<li><b><a href="http://www.woothemes.com/">WooThemes</a>:</b> For providing the application icon images through their excellent <a href="http://www.woothemes.com/2009/09/woofunction/">WooFunction Web Icon Set</a></li>
+</ul>
+
+
+</body>
+</html>
